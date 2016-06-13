@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+h2 {
+  font-family: Verdana;
+}
+
+p {
+  font-family: Verdana;
+}
+
+td.td {
+  border-width: 1px;
+  background-color: lightblue;
+  text-align: center;
+  font-family: Verdana;
+}
+</style>
+</head>
+<body>
+<h2 style="color:blue">Heads Up Sit-And-Go "All In Every Hand" Calculator</h2><hr>
+<p>This site is for all those poker players out there. You know when you're playing a heads up sit-and-go (HUSNG), and your opponent decides to go all-in preflop on every single hand? Yeah. That happens sometimes. Maybe they hate you. Maybe they're on severe tilt. Maybe they're doing it out of spite. Maybe they really need to go to the toilet, and want to end the sit-and-go as soon as possible. But whatever their motive for going all-in on every single hand, you have to decide when to call them off.<br><br>The problem is, if you fold too much and only wait for premium hands to call with, you might lose too much of your stack to blinds. On the other hand, calling down too light will mean you may have been better off folding and waiting for a better hand. How do you decide your range?<br><br>Well, here you go: I solved it. It's solvable, because if your opponent is going all-in on every hand, you know their exact strategy and all the variables involved and can find out exactly how different strategies will do against that, and optimise it.<br><br>To use it, enter the starting stack size in small blinds (so, if the starting stacks are 1500 and blinds are 15/30, that would be 100), your current stack size in small blinds, and what position you're in. It will output what range you'll call all-in with (or limp and then call all-in, if you're in the small blind).<br><br>I wrote the actual calculator in Python. Details of how these ranges got worked out are below, and the Python code to solve it is <a href="https://github.com/NotAnOctopus/husng-all-in-every-hand">here</a>. What you're seeing here is basically a database of the pre-generated output.</p>
+<hr><br>
+<p>Starting stack size (in small blinds)</p>
+<select id="pineapple">
+  <option>3</option>
+  <option>4</option>
+  <option>5</option>
+  <option>6</option>
+  <option>7</option>
+  <option>8</option>
+  <option>9</option>
+  <option>10</option>
+  <option>11</option>
+  <option>12</option>
+  <option>13</option>
+  <option>14</option>
+  <option>15</option>
+  <option>16</option>
+  <option>18</option>
+  <option>20</option>
+  <option>22</option>
+  <option>25</option>
+  <option>30</option>
+  <option>35</option>
+  <option>40</option>
+  <option>50</option>
+  <option>60</option>
+  <option>75</option>
+  <option selected>100</option>
+  <option>125</option>
+  <option>150</option>
+  <option>200</option>
+</select><br><br>
+<p>Your stack size (in small blinds) (has to be an integer)</p>
+<input type="text" id="grapefruit">
+<br>
+<br>
+<p>Are you in the small or big blind?</p>
+<input type="radio" name="thing" id="sb" checked>Small Blind<br>
+<input type="radio" name="thing" id="bb">Big Blind<br><br>
+<button onclick="will_someone_hire_me()">Submit</button>
+<br>
+<p id="answer"></p>
+<br>
+<br>
+
+<table id="chickens" border="1" align="center" cellpadding="3" cellspacing="2" style="background-color:#ffffff;">
+<tr>
+<td class='td'>AA</td>
+<td class='td'>AKs</td>
+<td class='td'>AQs</td>
+<td class='td'>AJs</td>
+<td class='td'>ATs</td>
+<td class='td'>A9s</td>
+<td class='td'>A8s</td>
+<td class='td'>A7s</td>
+<td class='td'>A6s</td>
+<td class='td'>A5s</td>
+<td class='td'>A4s</td>
+<td class='td'>A3s</td>
+<td class='td'>A2s</td>
+</tr>
+<tr>
+<td class='td'>AKo</td>
+<td class='td'>KK</td>
+<td class='td'>KQs</td>
+<td class='td'>KJs</td>
+<td class='td'>KTs</td>
+<td class='td'>K9s</td>
+<td class='td'>K8s</td>
+<td class='td'>K7s</td>
+<td class='td'>K6s</td>
+<td class='td'>K5s</td>
+<td class='td'>K4s</td>
+<td class='td'>K3s</td>
+<td class='td'>K2s</td>
+</tr>
+<tr>
+<td class='td'>AQo</td>
+<td class='td'>KQo</td>
+<td class='td'>QQ</td>
+<td class='td'>QJs</td>
+<td class='td'>QTs</td>
+<td class='td'>Q9s</td>
+<td class='td'>Q8s</td>
+<td class='td'>Q7s</td>
+<td class='td'>Q6s</td>
+<td class='td'>Q5s</td>
+<td class='td'>Q4s</td>
+<td class='td'>Q3s</td>
+<td class='td'>Q2s</td>
+</tr>
+<tr>
+<td class='td'>AJo</td>
+<td class='td'>KJo</td>
+<td class='td'>QJo</td>
+<td class='td'>JJ</td>
+<td class='td'>JTs</td>
+<td class='td'>J9s</td>
+<td class='td'>J8s</td>
+<td class='td'>J7s</td>
+<td class='td'>J6s</td>
+<td class='td'>J5s</td>
+<td class='td'>J4s</td>
+<td class='td'>J3s</td>
+<td class='td'>J2s</td>
+</tr>
+<tr>
+<td class='td'>ATo</td>
+<td class='td'>KTo</td>
+<td class='td'>QTo</td>
+<td class='td'>JTo</td>
+<td class='td'>TT</td>
+<td class='td'>T9s</td>
+<td class='td'>T8s</td>
+<td class='td'>T7s</td>
+<td class='td'>T6s</td>
+<td class='td'>T5s</td>
+<td class='td'>T4s</td>
+<td class='td'>T3s</td>
+<td class='td'>T2s</td>
+</tr>
+<tr>
+<td class='td'>A9o</td>
+<td class='td'>K9o</td>
+<td class='td'>Q9o</td>
+<td class='td'>J9o</td>
+<td class='td'>T9o</td>
+<td class='td'>99</td>
+<td class='td'>98s</td>
+<td class='td'>97s</td>
+<td class='td'>96s</td>
+<td class='td'>95s</td>
+<td class='td'>94s</td>
+<td class='td'>93s</td>
+<td class='td'>92s</td>
+</tr>
+<tr>
+<td class='td'>A8o</td>
+<td class='td'>K8o</td>
+<td class='td'>Q8o</td>
+<td class='td'>J8o</td>
+<td class='td'>T8o</td>
+<td class='td'>98o</td>
+<td class='td'>88</td>
+<td class='td'>87s</td>
+<td class='td'>86s</td>
+<td class='td'>85s</td>
+<td class='td'>84s</td>
+<td class='td'>83s</td>
+<td class='td'>82s</td>
+</tr>
+<tr>
+<td class='td'>A7o</td>
+<td class='td'>K7o</td>
+<td class='td'>Q7o</td>
+<td class='td'>J7o</td>
+<td class='td'>T7o</td>
+<td class='td'>97o</td>
+<td class='td'>87o</td>
+<td class='td'>77</td>
+<td class='td'>76s</td>
+<td class='td'>75s</td>
+<td class='td'>74s</td>
+<td class='td'>73s</td>
+<td class='td'>72s</td>
+</tr>
+<tr>
+<td class='td'>A6o</td>
+<td class='td'>K6o</td>
+<td class='td'>Q6o</td>
+<td class='td'>J6o</td>
+<td class='td'>T6o</td>
+<td class='td'>96o</td>
+<td class='td'>86o</td>
+<td class='td'>76o</td>
+<td class='td'>66</td>
+<td class='td'>65s</td>
+<td class='td'>64s</td>
+<td class='td'>63s</td>
+<td class='td'>62s</td>
+</tr>
+<tr>
+<td class='td'>A5o</td>
+<td class='td'>K5o</td>
+<td class='td'>Q5o</td>
+<td class='td'>J5o</td>
+<td class='td'>T5o</td>
+<td class='td'>95o</td>
+<td class='td'>85o</td>
+<td class='td'>75o</td>
+<td class='td'>65o</td>
+<td class='td'>55</td>
+<td class='td'>54s</td>
+<td class='td'>53s</td>
+<td class='td'>52s</td>
+</tr>
+<tr>
+<td class='td'>A4o</td>
+<td class='td'>K4o</td>
+<td class='td'>Q4o</td>
+<td class='td'>J4o</td>
+<td class='td'>T4o</td>
+<td class='td'>94o</td>
+<td class='td'>84o</td>
+<td class='td'>74o</td>
+<td class='td'>64o</td>
+<td class='td'>54o</td>
+<td class='td'>44</td>
+<td class='td'>43s</td>
+<td class='td'>42s</td>
+</tr>
+<tr>
+<td class='td'>A3o</td>
+<td class='td'>K3o</td>
+<td class='td'>Q3o</td>
+<td class='td'>J3o</td>
+<td class='td'>T3o</td>
+<td class='td'>93o</td>
+<td class='td'>83o</td>
+<td class='td'>73o</td>
+<td class='td'>63o</td>
+<td class='td'>53o</td>
+<td class='td'>43o</td>
+<td class='td'>33</td>
+<td class='td'>32s</td>
+</tr>
+<tr>
+<td class='td'>A2o</td>
+<td class='td'>K2o</td>
+<td class='td'>Q2o</td>
+<td class='td'>J2o</td>
+<td class='td'>T2o</td>
+<td class='td'>92o</td>
+<td class='td'>82o</td>
+<td class='td'>72o</td>
+<td class='td'>62o</td>
+<td class='td'>52o</td>
+<td class='td'>42o</td>
+<td class='td'>32o</td>
+<td class='td'>22</td>
+</tr>
+</table><br><hr>
+
+<script src="shoverangefinder.js"></script>
+<script src="big inflatable shark.js"></script>
+
+</body>
+</html>
