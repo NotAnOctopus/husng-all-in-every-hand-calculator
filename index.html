@@ -302,9 +302,7 @@ so yeah, you've got a big linear system of 4*n-4 equations. what you can do is e
 <br><br>
 in this case you want to find x. any linear algebra course will tell you to invert the matrix A to find A^-1 and times that by b. in terms of computational efficiency that's a terrible idea and what you're supposed to do instead is a faster method called gauss jordan elimination or some bullshit. i'll mention that later. but since the matrix A has loads of zeros in it, it's going to be pretty fast to solve for x, much faster than working out A^-1.
 <br><br>
-for convenience, for the n=4 case (starting stacks are 4, and blinds are 1/2) here's a picture of what the linear system looks like
-<br><br>
-insert pic here
+for convenience, for the n=4 case (starting stacks are 4, and blinds are 1/2) <a href="https://raw.githubusercontent.com/NotAnOctopus/husng-all-in-every-hand-calculator/gh-pages/thingy%20thing.PNG">here</a> is a picture of what the linear system looks like. yes, i wrote it by hand. don't ask why.
 <br><br>
 </p>
 <h3>Finding the optimal solution</h3>
@@ -330,24 +328,24 @@ the python script to solve this thing is linked at the top.
 <br><br>
 the file equities.py contains the list of starting hands ranked by equity against a random hand, their equities, along with the win, fold, and lose probabilities for each hand if you start with a given all-in range.
 <br><br>
-the file 4bb solver.py solves the thing in the case where starting stacks are 4 and blinds are 1/2. the only difference between this and the general solver is that i write out the matrix A in full, so it's clearer to see what's going on. the starting shove[] vector i use is way off on purpose so that the program can optimise it. i used the scipy.sparse.linalg module to do the linear algebra; the matrix A is very sparse, as only three of the entries in each row aren't zero.
+the file 4bb solver.py solves the thing in the case where starting stacks are 4 and blinds are 1/2. the only difference between this and the general solver is that i write out the matrix A in full, like in the above pic, so it's clearer to see what's going on. the starting shove[] vector i use is way off on purpose so that the program can optimise it. i used the scipy.sparse.linalg module to do the linear algebra (i.e. solving Ax=b by gauss jordan elimination); the matrix A is very sparse, as only three of the entries in each row aren't zero.
 <br><br>
-the output here is a revised shove vector containing what your all-in ranges are for each situation where n means the top (n+1) hands ranked by equity, so n=168 means any two and 0 means just aces.
+the output here is a revised shove vector containing what the optimal all-in ranges are for each situation where n means the top (n+1) hands ranked by equity, so n=168 means any two, and 0 means just aces.
 <br><br>
-the file general solver.py does it in full. the only difference is that the matrix is constructed by working out where all the entries should be and putting them in there. it was really fiddly.
+the file general solver.py does it in full, for general n. the only difference is that the matrix is constructed by working out where all the entries should be and putting them in there. it was really fiddly. n used here is the same as the input in the first field of this website.
 <br><br>
-the file testing.py tests the program to see if the output matches up with what's expected. basically it runs 100000 husng's with any stated set of shove ranges and returns how many wins. i don't deal out opponent's cards and the flop-turn-river; i just rely on the equities list to determine the probability of winning a hand. that saves time. but yeah i tested it, and results are pretty much exactly as expected :)
+the file testing.py tests the program to see if the output matches up with what's expected. basically, for a given n, it runs 100000 husng's with any stated set of shove ranges and returns how many times you win. i don't deal out opponent's cards and the flop-turn-river; i just rely on the equities list to determine the probability of winning a hand, as it saves time. but yeah i tested it, and results are pretty much exactly as expected :) so i'm pretty sure it works
 <br><br>
-output is in the file husng all in every hand output.txt. that's the big database i use when you use this website and it gives you the answer you want.
-<br><br></p>
+finally, output is in the file husng all in every hand output.txt. that's the big database i use when you use this website and it gives you the answer you want.
+<br><br><hr></p>
 <h3>Other stuff</h3>
-<br><p>i'm new to web development so i'd love it if anyone were to give me feedback on this site and my other stuff. if you liked this site, check out some of my other stuff:
+<br><p>i'm pretty new to web development so i'd love it if anyone were to give me feedback on this site, and my other stuff. if you liked this site, check out some of my other stuff:
 <br><br>
-<a href="http://notanoctopus.github.io/open-face-chinese-poker-fantasyland/">open face chinese fantasyland calculator</a> for those of you who play ofc or ofc/p<br>
-<a href="http://notanoctopus.github.io/sloth-or-pain-au-chocolat/">sloth or pain au chocolat?</a> because sloths look a lot like pains au chocolat<br>
-<a href="http://notanoctopus.github.io/mcdonalds-breakfast-anytime-calculator/">mcdonalds breakfast anytime calculator</a> for rich people who are eager to get their hands on a mcdonald's breakfast anytime
-<br><br>
-i wrote most of this thing in a big rush i'll be back in a few hours to clear stuff up and make improvements bye</p>
+<a href="http://notanoctopus.github.io/open-face-chinese-poker-fantasyland/">Open Face Chinese Fantasyland calculator</a> for those of you who play ofc or ofc/p<br>
+<a href="http://notanoctopus.github.io/sloth-or-pain-au-chocolat/">Sloth or Pain Au Chocolat?</a> because sloths look a lot like pains au chocolat<br>
+<a href="http://notanoctopus.github.io/mcdonalds-breakfast-anytime-calculator/">McDonald's Breakfast Anytime Calculator</a> for rich people who are eager to get their hands on a mcdonald's breakfast anytime, no matter how desperate they are
+<br><hr>
+NotAnOctopus, 2016-06-14</p>
 
 <script src="shoverangefinder.js"></script>
 <script src="big inflatable shark.js"></script>
