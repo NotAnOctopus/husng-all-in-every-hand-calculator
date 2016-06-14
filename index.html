@@ -20,7 +20,7 @@ td.td {
 </head>
 <body>
 <h2 style="color:blue">Heads Up Sit-And-Go "All In Every Hand" Calculator</h2><hr>
-<p>This site is for all those poker players out there. You know when you're playing a heads up sit-and-go (HUSNG), and your opponent decides to go all-in preflop on every single hand? Yeah. That happens sometimes. Maybe they hate you. Maybe they're on severe tilt. Maybe they're doing it out of spite. Maybe they really need to go to the toilet, and want to end the sit-and-go as soon as possible. But whatever their motive for going all-in on every single hand, you have to decide when to call them off.<br><br>The problem is, if you fold too much and only wait for premium hands to call with, you might lose too much of your stack to blinds. On the other hand, calling down too light will mean you may have been better off folding and waiting for a better hand. How do you decide your range?<br><br>Well, here you go: I solved it. It's solvable, because if your opponent is going all-in on every hand, you know their exact strategy and all the variables involved and can find out exactly how different strategies will do against that, and optimise it.<br><br>To use it, enter the starting stack size in small blinds (so, if the starting stacks are 1500 and blinds are 15/30, that would be 100), your current stack size in small blinds, and what position you're in. It will output what range you'll call all-in with (or limp and then call all-in, if you're in the small blind).<br><br>I wrote the actual calculator in Python. Details of how these ranges got worked out are below, and the Python code to solve it is <a href="https://github.com/NotAnOctopus/husng-all-in-every-hand">here</a>. What you're seeing here is basically a database of the pre-generated output.</p>
+<p>This site is for all those poker players out there. You know when you're playing a heads up sit-and-go (HUSNG), and your opponent decides to go all-in preflop on every single hand? Yeah. That happens sometimes. Maybe they hate you. Maybe they're on severe tilt. Maybe they're doing it out of spite. Maybe they really need to go to the toilet, and want to end the sit-and-go as soon as possible. But whatever their motive for going all-in on every single hand, you have to decide when to call them off.<br><br>The problem is, if you fold too much and only wait for premium hands to call with, you might lose too much of your stack to blinds. On the other hand, calling down too light will mean you may have been better off folding and waiting for a better hand. How do you decide your range?<br><br>Well, here you go: I solved it. It's solvable, because if your opponent is going all-in on every hand, you know their exact strategy and all the variables involved and can find out exactly how different strategies will do against that, and optimise it.<br><br>To use it, enter the starting stack size in small blinds (so, if the starting stacks are 1500 and blinds are 15/30, that would be 100), your current stack size in small blinds, and what position you're in. It will output what range you'll call all-in with (or limp and then call all-in, if you're in the small blind).<br><br>I wrote the actual solver in Python. Details of how these ranges got worked out are below, and the Python code to solve it is <a href="https://github.com/NotAnOctopus/husng-all-in-every-hand">here</a>. What you're seeing here is basically a database of the pre-generated output.</p>
 <hr><br>
 <p>Starting stack size (in small blinds)</p>
 <select id="pineapple">
@@ -263,6 +263,87 @@ td.td {
 <td class='td'>22</td>
 </tr>
 </table><br><hr>
+
+<h3>
+How the ranges were calculated
+</h3><br>
+<p>i'm writing this section so anyone who wants to know how i did it can read it and be sure i'm not just making stuff up off the top of my head. otherwise ignore it.
+<br><br>
+so basically to start off with, if your opponent is going all-in on every hand then your calling range is going to be the top x% of hands, according to equity against a random hand, for some value of x chosen by you. there's no point getting fancy and overplaying low equity hands like suited connectors or something, because you know what their range is and you want to find hands that play best according to their range (i.e. anything). that means that your calling range in each spot is determined by a single number that can take one of 169 possible values: the tightest possible range is calling with just AA, and then {AA,KK}, and so on, until the widest range is any two cards.
+<br><br>
+the idea is now to find a way to calculate your chance of winning the husng given a set of ranges for calling shoves with, and optimise it.
+<br><br>
+now let's say you've decided on how wide you're calling a shove in each spot. how to determine your chances of winning?
+<br><br>
+let's introduce some notation for now: the blinds are 1/2, and s1, s2, s3... indicate your chance of winning the thing if you are in the small blind with a stack size of 1, 2, 3..., and b1, b2, b3... similarly for if you're in the big blind. write J() for your shoving range on each situation, so J(s4) means the hands you're shoving with if you're the small blind and you have a stack size of 4. finally, write x(h) for the equity that hand h has against a random hand, so like x(aces) = 86% ish.
+<br><br>
+you're going to get a big bunch of equations that look like this
+<br><br>
+s3 = 1/1326 * [sum( (x(h) * b6) for h in J(s3)) + sum( b2 for h not in J(s3))]
+<br><br>
+an explanation is this. 1326 is the number of possible hands you can get dealt, so this calculation for when you're the small blind with stack 3 is an average over what happens with all possible hands h. then the first term in the sum represents what happens when you go all-in. you're going all-in with all hands in J(s3) and then if you win, your stack becomes 6, and you become the big blind. the chance of you winning with hand hh is x(h), so the total contribution to this sum for each hand is x(h) * b6 if you win. if you lose, then if your stack is less than or equal to the starting stack, you lose everything, so your chance afterwards becomes 0, so there's no contribution to the sum. the other term in the sum describes what happens if the hand is in your folding range (not in J(s3)). then the next hand you're in the big blind with stack size 2, i.e. your equity for each hand becomes b2.
+<br><br>
+if your stack is bigger than the starting stack, then you win the whole thing if you win this hand, but you're still alive if you lose the hand. then the relevant equation looks like this
+<br><br>
+e.g. if starting stacks were 4, and you're in the sb with 5:<br>
+s5 = 1/1326 * [ sum( x(h) + (1-x(h))*b2 for h in J(s5)) + sum( b4 for h not in J(s5)) ]
+<br><br>
+so here, x(h) in the first sum represents the times you go all-in and win, and (1-x(h))*b2 represents the times you go all-in and lose and end up in the big blind with a stack of 2. finally, the second term represents the times you fold and end up in the big blind with a stack of 4.
+<br><br>
+so all your equations look like this. they are all linear combinations of the values s1, s2, ... and b1, b2, ... and the coefficients in front of those values are wholly determined by your shoving ranges J(). that means that if you know in advance what ranges you want to call all-in with, then what you have is a big system of linear simultaneous equations that you can get a computer to solve. how many equations are there? there are 4*n-4, where your starting stack is n (if your blinds are 1/2). that's because there are 2 for each of the stack sizes 1, 2, 3, ..., 2*n-2. (you don't include 2*n-1 because it's impossible to get to that starting stack size from the previous hand.)
+<br><br>
+note that i'm ignoring ties here, i.e. only counting wins and losses. that's because if a hand is tied, the pot is split and you're in the same situation with the big and small blinds reversed. since your position in one particular hand doesn't have much impact at all in your chances of winning the husng, and ties are relatively rare, it's safe to use equity instead of a fully comprehensive win-tie-lose system. i might include ties later if i'm bothered.
+<br><br>
+so yeah, you've got a big linear system of 4*n-4 equations. what you can do is express it as a matrix equation Ax=b, where A is a big matrix, b is a big vector representing chances of winning the husng immediately after the hand. x is a big vector of all the situations s1, s2, ..., b1, b2, ... which is what you want to calculate.
+<br><br>
+in this case you want to find x. any linear algebra course will tell you to invert the matrix A to find A^-1 and times that by b. in terms of computational efficiency that's a terrible idea and what you're supposed to do instead is a faster method called gauss jordan elimination or some bullshit. i'll mention that later. but since the matrix A has loads of zeros in it, it's going to be pretty fast to solve for x, much faster than working out A^-1.
+<br><br>
+for convenience, for the n=4 case (starting stacks are 4, and blinds are 1/2) here's a picture of what the linear system looks like
+<br><br>
+insert pic here
+<br><br>
+</p>
+<h3>Finding the optimal solution</h3>
+<p><br><br>
+so now we have a thingy that calculates your chances of winning the husng given shove ranges. how to find the ideal shove ranges?
+<br><br>
+consider the vector x = (b1, s1, b2, s2, ...) if it's an optimal strategy, then it's going to have to be optimal (i.e. have biggest probabilities of winning, or at least tied with biggest) in every one of its coordinates. the argument behind this is as follows. let's look at the equation for s3 again
+<br><br>
+s3 = 1/1326 * [sum( (x(h) * b6) for h in J(s3)) + sum( b2 for h not in J(s3))]
+<br><br>
+so what happens if you change what J(s3) is?
+<br><br>
+if you change J(s3), then the above equation is going to make s3 bigger or smaller depending on what b6 and b2 are. this in turn is going to have a knock-on effect on stuff that depends on s3, i.e. situations that could occur one hand before you're in the sb with stack 3. in this case, just b5. (if you had s4 instead, then you could have come from b2, b6 or b(n+2), depending on if you won, folded or lost that hand respectively.) but since each variable is simply a weighted sum of the variables around it, if s3 goes up, that will in turn make b5 go up (which will in turn increase s6, then b3 and so on). similarly for down. in particular, all the values have to go the same way: all up or all down, excluding some values that will be unaffected. in particular, changing a shoving range can't make some of the numbers go up and some of them down.
+<br><br>
+with this in mind, i chose to find the sum of all the probabilities in the vector x, and make the sum biggest; the biggest sum would correspond to the optimal solution. i did it for the sum instead of individual coordinates because i wouldn't have to deal with ties and stuff and it would be more accurate as i wouldn't have to deal with tiny decimal rounding errors or bullshit in the last decimal places.
+<br><br>
+so what i did to get to the optimal solution was: pick any starting vector x of shoving ranges, can be anything. pick a coordinate at random, increase it by 1, see if it improves the sum of probabilities. if it doesn't, try decreasing it by 1 and see if that improves it. if either work, update the vector x with the new version. keep doing that until it can't be improved. since there are only 169*(2*n-2) possible ranges for all the situations, that's the maximum number of steps it would take to get to the optimum.
+<br><br></p>
+<h3>Doing all this in Python</h3>
+<p>
+<br><br>
+the python script to solve this thing is linked at the top.
+<br><br>
+the file equities.py contains the list of starting hands ranked by equity against a random hand, their equities, along with the win, fold, and lose probabilities for each hand if you start with a given all-in range.
+<br><br>
+the file 4bb solver.py solves the thing in the case where starting stacks are 4 and blinds are 1/2. the only difference between this and the general solver is that i write out the matrix A in full, so it's clearer to see what's going on. the starting shove[] vector i use is way off on purpose so that the program can optimise it. i used the scipy.sparse.linalg module to do the linear algebra; the matrix A is very sparse, as only three of the entries in each row aren't zero.
+<br><br>
+the output here is a revised shove vector containing what your all-in ranges are for each situation where n means the top (n+1) hands ranked by equity, so n=168 means any two and 0 means just aces.
+<br><br>
+the file general solver.py does it in full. the only difference is that the matrix is constructed by working out where all the entries should be and putting them in there. it was really fiddly.
+<br><br>
+the file testing.py tests the program to see if the output matches up with what's expected. basically it runs 100000 husng's with any stated set of shove ranges and returns how many wins. i don't deal out opponent's cards and the flop-turn-river; i just rely on the equities list to determine the probability of winning a hand. that saves time. but yeah i tested it, and results are pretty much exactly as expected :)
+<br><br>
+output is in the file husng all in every hand output.txt. that's the big database i use when you use this website and it gives you the answer you want.
+<br><br></p>
+<h3>Other stuff</h3>
+<br><p>i'm new to web development so i'd love it if anyone were to give me feedback on this site and my other stuff. if you liked this site, check out some of my other stuff:
+<br><br>
+<a href="http://notanoctopus.github.io/open-face-chinese-poker-fantasyland/">open face chinese fantasyland calculator</a> for those of you who play ofc or ofc/p<br>
+<a href="http://notanoctopus.github.io/sloth-or-pain-au-chocolat/">sloth or pain au chocolat?</a> because sloths look a lot like pains au chocolat<br>
+<a href="http://notanoctopus.github.io/mcdonalds-breakfast-anytime-calculator/">mcdonalds breakfast anytime calculator</a> for rich people who are eager to get their hands on a mcdonald's breakfast anytime
+<br><br>
+i wrote most of this thing in a big rush i'll be back in a few hours to clear stuff up and make improvements bye</p>
 
 <script src="shoverangefinder.js"></script>
 <script src="big inflatable shark.js"></script>
