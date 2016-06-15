@@ -285,7 +285,7 @@ you're going to get a big bunch of equations that look like this
 <br><br>
 s3 = 1/1326 * [sum( (x(h) * b6) for h in J(s3)) + sum( b2 for h not in J(s3))]
 <br><br>
-an explanation is this. 1326 is the number of possible hands you can get dealt, so this calculation for when you're the small blind with stack 3 is an average over what happens with all possible hands h. then the first term in the sum represents what happens when you go all-in. you're going all-in with all hands in J(s3) and then if you win, your stack becomes 6, and you become the big blind. the chance of you winning with hand hh is x(h), so the total contribution to this sum for each hand is x(h) * b6 if you win. if you lose, then if your stack is less than or equal to the starting stack, you lose everything, so your chance afterwards becomes 0, so there's no contribution to the sum. the other term in the sum describes what happens if the hand is in your folding range (not in J(s3)). then the next hand you're in the big blind with stack size 2, i.e. your equity for each hand becomes b2.
+here is an explanation: 1326 is the number of possible hands you can get dealt, so this calculation for when you're the small blind with stack 3 is an average over what happens with all possible hands h. then the first term in the sum represents what happens when you go all-in. you're going all-in with all hands in J(s3) and then if you win, your stack becomes 6, and you become the big blind. the chance of you winning with hand h is x(h), so the total contribution to this sum for each hand is x(h) * b6 if you win. if you lose, then if your stack is less than or equal to the starting stack, you lose everything, so your chance afterwards becomes 0, so there's no contribution to the sum. the other term in the sum describes what happens if the hand is in your folding range (not in J(s3)). then the next hand you're in the big blind with stack size 2, i.e. your equity for each hand becomes b2.
 <br><br>
 if your stack is bigger than the starting stack, then you win the whole thing if you win this hand, but you're still alive if you lose the hand. then the relevant equation looks like this
 <br><br>
@@ -319,7 +319,7 @@ if you change J(s3), then the above equation is going to make s3 bigger or small
 <br><br>
 with this in mind, i chose to find the sum of all the probabilities in the vector x, and make the sum biggest; the biggest sum would correspond to the optimal solution. i did it for the sum instead of individual coordinates because i wouldn't have to deal with ties and stuff and it would be more accurate as i wouldn't have to deal with tiny decimal rounding errors or bullshit in the last decimal places.
 <br><br>
-so what i did to get to the optimal solution was: pick any starting vector x of shoving ranges, can be anything. pick a coordinate at random, increase it by 1, see if it improves the sum of probabilities. if it doesn't, try decreasing it by 1 and see if that improves it. if either work, update the vector x with the new version. keep doing that until it can't be improved. since there are only 169*(2*n-2) possible ranges for all the situations, that's the maximum number of steps it would take to get to the optimum.
+so what i did to get to the optimal solution was: pick any starting vector x of shoving ranges, can be anything. pick a coordinate at random, increase it by 1, see if it improves the sum of probabilities. if it doesn't, try decreasing it by 1 and see if that improves it. if either work, update the vector x with the new version. keep doing that until it can't be improved. the maximum number of steps it would take to get to the optimum is around 169*(2*n-2), because each of the 2*n-2 co-ordinates goes up or down once in each step, getting closer to the optimum (an individual co-ordinate can over-shoot during the calculation if the rest of the co-ordinates are way off, but that sort of thing gets fixed really fast).
 <br><br></p>
 <h3>Doing all this in Python</h3>
 <p>
@@ -337,15 +337,15 @@ the file general solver.py does it in full, for general n. the only difference i
 the file testing.py tests the program to see if the output matches up with what's expected. basically, for a given n, it runs 100000 husng's with any stated set of shove ranges and returns how many times you win. i don't deal out opponent's cards and the flop-turn-river; i just rely on the equities list to determine the probability of winning a hand, as it saves time. but yeah i tested it, and results are pretty much exactly as expected :) so i'm pretty sure it works
 <br><br>
 finally, output is in the file husng all in every hand output.txt. that's the big database i use when you use this website and it gives you the answer you want.
-<br><br><hr></p>
+<br><br></p><hr>
 <h3>Other stuff</h3>
-<br><p>i'm pretty new to web development so i'd love it if anyone were to give me feedback on this site, and my other stuff. if you liked this site, check out some of my other stuff:
+<p><br>i'm pretty new to web development so i'd love it if anyone were to give me feedback on this site, and my other stuff. if you liked this site, check out some of my other stuff:
 <br><br>
 <a href="http://notanoctopus.github.io/open-face-chinese-poker-fantasyland/">Open Face Chinese Fantasyland calculator</a> for those of you who play ofc or ofc/p<br>
 <a href="http://notanoctopus.github.io/sloth-or-pain-au-chocolat/">Sloth or Pain Au Chocolat?</a> because sloths look a lot like pains au chocolat<br>
 <a href="http://notanoctopus.github.io/mcdonalds-breakfast-anytime-calculator/">McDonald's Breakfast Anytime Calculator</a> for rich people who are eager to get their hands on a mcdonald's breakfast anytime, no matter how desperate they are
-<br><hr>
-NotAnOctopus, 2016-06-14</p>
+<br></p><hr>
+<p>NotAnOctopus, 2016-06-14</p>
 
 <script src="shoverangefinder.js"></script>
 <script src="big inflatable shark.js"></script>
