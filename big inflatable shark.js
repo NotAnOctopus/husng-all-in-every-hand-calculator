@@ -30,3 +30,8 @@ function velociraptor(c) {
     please_hire_me[tableindex[w]].style.backgroundColor = (w<=c ? "red" : "lightblue");
   }
 }
+
+function thingything() {
+  document.getElementById("cookies").style.display="block";
+  document.getElementById("cookies").style.visibility="visible";
+}
